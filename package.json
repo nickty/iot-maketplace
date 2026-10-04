@@ -3,13 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-"scripts": {
-  "dev1": "ts-node src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "prisma:studio": "prisma studio",
-  "prisma:migrate": "prisma migrate dev"
-},
+  "scripts": {
+    "dev": "ts-node src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "prisma:studio": "prisma studio",
+    "prisma:migrate": "prisma migrate dev"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -17,15 +17,19 @@
   "dependencies": {
     "@fastify/cors": "^11.3.0",
     "@fastify/jwt": "^10.2.2",
+    "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "bcrypt": "^6.0.0",
     "dotenv": "^18.0.5",
     "fastify": "^5.12.5",
+    "fastify-plugin": "^6.0.0",
+    "pg": "^8.23.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
     "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
     "prisma": "^7.10.0",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3"

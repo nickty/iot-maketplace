@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// A tenant is an organization: either a data producer or a data consumer.
+// Every row in every future table will be linked to a tenant.
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  type      TenantType
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users   User[]
+  devices Device[]
+
+  @@map("tenants")
+}
+
+enum TenantType {
+  PRODUCER  // Owns IoT devices, sells data
+  CONSUMER  // Buys and queries data
+}
+
+// A user is a person who logs in. Belongs to exactly one tenant.
+model User {
+  id           String   @id @default(uuid())
+  tenantId     String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(MEMBER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+// An IoT device owned by a producer tenant.
+model Device {
+  id           String   @id @default(uuid())
+  tenantId     String
+  name         String
+  deviceKey    String   @unique  // API key the device uses to authenticate
+  status       DeviceStatus @default(ACTIVE)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@map("devices")
+}
+
+enum DeviceStatus {
+  ACTIVE
+  INACTIVE
+  REVOKED
+}

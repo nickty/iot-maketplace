@@ -9,6 +9,7 @@ import jwt from "@fastify/jwt";
 import prismaPlugin from "./plugins/prisma";
 import authPlugin from "./plugins/auth";
 import authRoutes from "./routes/auth";
+import deviceRoutes from "./routes/devices";
 
 
 
@@ -40,6 +41,7 @@ async function startServer() {
 
   // Register routes.
   await app.register(authRoutes, { prefix: "/api/v1" });
+  await app.register(deviceRoutes, { prefix: '/api/v1' });
 
   await app.listen({ port, host: "0.0.0.0" });
   app.log.info(`Server listening on port ${port}`);

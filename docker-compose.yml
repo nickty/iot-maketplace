@@ -19,5 +19,39 @@ services:
       timeout: 5s
       retries: 5
 
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: iot_marketplace_kafka
+    restart: unless-stopped
+    command:
+      - redpanda
+      - start
+      - --smp=1
+      - --memory=1G
+      - --overprovisioned
+      - --node-id=0
+      - --kafka-addr=PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:29092,OUTSIDE://localhost:9092
+      - --pandaproxy-addr=0.0.0.0:8082
+      - --advertise-pandaproxy-addr=localhost:8082
+    ports:
+      - "9092:9092"    # Kafka API (from your host)
+      - "8082:8082"    # HTTP Proxy (optional, for debugging)
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+
+      
+  redpanda-console:
+    image: redpandadata/console:latest
+    container_name: iot_marketplace_kafka_ui
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_BROKERS: redpanda:29092
+    depends_on:
+      - redpanda
+
 volumes:
   postgres_data:
+  redpanda_data:

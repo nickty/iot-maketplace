@@ -18,6 +18,9 @@ declare module '@fastify/jwt' {
 
 // Extend FastifyInstance to recognize app.authenticate decorator
 declare module 'fastify' {
+  interface FastifyRequest {
+    user: JwtPayload;
+  }
   interface FastifyInstance {
     authenticate: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
   }

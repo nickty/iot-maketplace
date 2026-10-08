@@ -70,3 +70,31 @@ enum DeviceStatus {
   INACTIVE
   REVOKED
 }
+
+model Telemetry {
+  id         String   @default(uuid()) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  deviceId   String   @map("device_id") @db.Uuid
+  metric     String
+  value      Float
+  unit       String?
+  timestamp  DateTime
+  receivedAt DateTime @default(now()) @map("received_at")
+  latitude   Float?
+  longitude  Float?
+  metadata   Json     @default("{}")
+
+  @@id([id, timestamp])
+  @@index([tenantId, timestamp(sort: Desc)])
+  @@index([deviceId, timestamp(sort: Desc)])
+  @@map("telemetry")
+}
+
+model ProcessedEvent {
+  eventId     String   @id @map("event_id") @db.Uuid
+  consumer    String
+  processedAt DateTime @default(now()) @map("processed_at")
+
+  @@index([processedAt(sort: Desc)])
+  @@map("processed_events")
+}

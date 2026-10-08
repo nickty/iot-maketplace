@@ -11,8 +11,8 @@ export interface TelemetryInput {
   metric: string;
   value: number;
   unit: string | null;
-  timestamp: string;      // ISO 8601
-  receivedAt: string;     // ISO 8601
+  timestamp: string; // ISO 8601
+  receivedAt: string; // ISO 8601
   location: { lat: number; lng: number } | null;
   metadata: Record<string, unknown>;
 }
@@ -31,7 +31,7 @@ export interface TelemetryInput {
  */
 export async function persistTelemetryBatch(
   consumer: string,
-  events: Array<TelemetryInput & { eventId: string }>
+  events: Array<TelemetryInput & { eventId: string }>,
 ): Promise<{ written: number; skipped: number }> {
   let written = 0;
   let skipped = 0;
@@ -61,9 +61,10 @@ export async function persistTelemetryBatch(
       }
 
       // Step 2: insert the telemetry row.
+      const newRowId = randomUUID();
       await tx.telemetry.create({
         data: {
-          id: randomUUID(),
+          id: newRowId,
           tenantId: event.tenantId,
           deviceId: event.deviceId,
           metric: event.metric,
@@ -76,6 +77,14 @@ export async function persistTelemetryBatch(
           metadata: event.metadata as Prisma.InputJsonValue,
         },
       });
+
+      if (event.location) {
+        await tx.$executeRaw`
+    UPDATE telemetry
+    SET location = ST_SetSRID(ST_MakePoint(${event.location.lng}, ${event.location.lat}), 4326)::geography
+    WHERE id = ${newRowId}::uuid AND timestamp = ${new Date(event.timestamp)}
+  `;
+      }
 
       written++;
     }

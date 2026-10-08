@@ -1,14 +1,25 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { ensureTopic, tenantTelemetryTopic } from "./lib/topics";
+import {
+  ensureTopic,
+  tenantAlertTopic,
+  tenantTelemetryTopic,
+} from "./lib/topics";
 import { prismaAdmin } from "./lib/prisma";
 import { startLogConsumer } from "./consumers/log-consumer";
 import { startStorageConsumer } from "./consumers/storage-consumer";
+import { startAlertConsumer } from "./consumers/alert-consumer";
+import { startAlertLogConsumer } from "./consumers/alert-log-consumer";
 
 async function startConsumers() {
-  const allTenants = await prismaAdmin.tenant.findMany({ select: { id: true } });
+  const allTenants = await prismaAdmin.tenant.findMany({
+    select: { id: true },
+  });
   const telemetryTopics = allTenants.map((t) => tenantTelemetryTopic(t.id));
+
+  const alertTopics = allTenants.map((t) => tenantAlertTopic(t.id));
+  for (const t of alertTopics) await ensureTopic(t);
 
   for (const topic of telemetryTopics) {
     await ensureTopic(topic);
@@ -25,6 +36,8 @@ async function startConsumers() {
   await Promise.all([
     startLogConsumer(telemetryTopics),
     startStorageConsumer(telemetryTopics),
+    startAlertConsumer(telemetryTopics),
+    startAlertLogConsumer(alertTopics),
   ]);
 }
 

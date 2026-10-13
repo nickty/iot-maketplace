@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   postgres:
-    image: timescale/timescaledb:latest-pg16
+    image: timescale/timescaledb-ha:pg16
     container_name: iot_marketplace_db
     restart: unless-stopped
     command: postgres -c shared_preload_libraries=timescaledb
@@ -52,6 +52,23 @@ services:
       KAFKA_BROKERS: redpanda:29092
     depends_on:
       - redpanda
+
+
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: iot_marketplace_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@local.dev
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+
+
 
 volumes:
   postgres_data:

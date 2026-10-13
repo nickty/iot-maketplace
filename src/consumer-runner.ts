@@ -11,6 +11,7 @@ import { startLogConsumer } from "./consumers/log-consumer";
 import { startStorageConsumer } from "./consumers/storage-consumer";
 import { startAlertConsumer } from "./consumers/alert-consumer";
 import { startAlertLogConsumer } from "./consumers/alert-log-consumer";
+import { startLakeConsumer } from "./lib/lake-consumer";
 
 async function startConsumers() {
   const allTenants = await prismaAdmin.tenant.findMany({
@@ -38,6 +39,7 @@ async function startConsumers() {
     startStorageConsumer(telemetryTopics),
     startAlertConsumer(telemetryTopics),
     startAlertLogConsumer(alertTopics),
+    startLakeConsumer(telemetryTopics),
   ]);
 }
 
